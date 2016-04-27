@@ -1,0 +1,24 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <title>Javascript Greeting</title>
+  <style>
+    .header { font-size: 140% }
+  </style>
+</head>
+<body>
+  <h1>Greeting by Javascript</h1>
+
+  <div class="header"> Welcome,
+<SCRIPT>
+  var pos=document.URL.indexOf("name=")+5;
+  var name=pos > 4 ? document.URL.substring(pos, document.URL.length)
+                    : "anonymous coward";
+  document.write(decodeURIComponent(name));
+</SCRIPT>
+</div>
+
+     
+</body>
+</html>

