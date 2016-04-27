@@ -17,4 +17,14 @@ The cookie theft is done by writing up in the message input the following line m
 
 Because the form inputs are not sanitised or checked in any way by the server we can save the message in the databese like it is. If in a Second-Order SQL Injection the data stored in database is later used to conduct SQL injection, In this case we might say that this is a Second-Order cookie hijacking because we get the session token when the user clicks on our message and renders the HTML page with our script. Stored Cross-site Scripting (XSS) is the most dangerous type of Cross Site Scripting. Web applications that allow users to store data are potentially exposed to this type of attack.
 
+## Attack B. Cross-Site Request Forgery
 
+In the transfer page we have this form for transfering coins:
+
+	`<form method="POST" name="transferform" action="/transfer.php">
+		<p>Send <input name="coins" value="" size="5" type="text"> DIKU Coins</p>
+		<p>to <input name="recipient" value="" type="text"></p>
+		<input name="submission" value="Send" type="submit">
+	</form>`
+
+We will need to modify this form and place it into our malicious webpage. The solution for type of attack can be found in the `malicious.html` docoument
