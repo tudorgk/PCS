@@ -9,7 +9,7 @@ _start:
 
    	mov al, SYS_fork ; SYS_FORK Op Code
 	int 0x80
-	cmp al, 0 ;If the return value is 0, we are in the child process
+	cmp al, bl ;If the return value is 0, we are in the child process
 	jz child
 
 parent:
@@ -44,7 +44,7 @@ parent:
 	jmp exit ;Exit
 
 child:
-	jmp exit
+	xor eax, eax
 
 exit:
 	mov     bl, 1 ; Exit code
