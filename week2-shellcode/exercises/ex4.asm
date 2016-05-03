@@ -6,7 +6,7 @@ _start:
     xor ebx, ebx
     xor edx, edx
     xor ecx, ecx
-	
+    
 	mov bx, 42
 	mov ax, SYS_exit
 	int 0x80
