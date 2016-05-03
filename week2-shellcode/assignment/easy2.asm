@@ -14,7 +14,7 @@ _start:
 
 parent:
 	;  The parent should execute /bin/uname with the single argument "-a".
-	
+
 	; push '-a' onto stack 
     xor eax, eax ; make eax null
     push eax ; use eax as  null terminator
@@ -44,7 +44,18 @@ parent:
 	jmp exit ;Exit
 
 child:
-	xor eax, eax
+	; set the first letter 'a'
+	mov cl, 0x61 
+
+alphaloop:
+	mov dl, 0x01
+    mov bl, STD_OUT
+    mov al, SYS_write 
+    int 0x80
+	; increment the letter
+	inc cl
+	cmp cl, 0x7a
+	jne alphaloop
 
 exit:
 	mov     bl, 1 ; Exit code
