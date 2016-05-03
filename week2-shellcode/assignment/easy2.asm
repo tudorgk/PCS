@@ -45,17 +45,26 @@ parent:
 
 child:
 	; set the first letter 'a'
-	mov cl, 0x61 
-
-alphaloop:
-	mov dl, 0x01
+	push eax
+	push byte `a`
+	mov ecx, esp
+	mov dl, 1
     mov bl, STD_OUT
     mov al, SYS_write 
-    int 0x80
+    int 0x80 ; print the letter
+
+alphaloop:
+	cmp byte[ecx], 'z'
+	je exit
 	; increment the letter
-	inc cl
-	cmp cl, 0x7a
-	jne alphaloop
+	add byte [esp], 1
+
+    mov dl, 1
+    mov bl, STD_OUT
+    mov al, SYS_write 
+    int 0x80 ; print the letter
+
+    jmp alphaloop
 
 exit:
 	mov     bl, 1 ; Exit code

@@ -7,7 +7,6 @@ main:
 	xor ebx, ebx
 	xor ecx, ecx
 	xor edx, edx
-
 	
 	push eax
 	push byte `a`
