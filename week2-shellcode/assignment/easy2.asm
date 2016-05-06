@@ -37,17 +37,16 @@ parent:
 	push ebx
 	mov ecx, esp
 
-	; eax = 0; Perform execve with /usr/bin/id -u
+	; Perform execve with /usr/bin/id -u
 	mov al, SYS_execve
 	int 0x80
 
 	jmp exit ;Exit
 
 child:
-	; set the first letter 'a'
-	push eax
-	push byte `a`
-	mov ecx, esp
+	push eax ; push null terminator
+	push byte `a` ; set the first letter 'a'
+	mov ecx, esp ; set the address 
 	mov dl, 1
     mov bl, STD_OUT
     mov al, SYS_write 
@@ -55,11 +54,10 @@ child:
 
 alphaloop:
 	cmp byte[ecx], 'z'
-	je exit
+	je exit ; if we reached the letter 'z' we exit
 	; increment the letter
 	add byte [esp], 1
-
-    mov dl, 1
+    mov dl, 4 ; when using push byte we push actually 4 byte onto the stack
     mov bl, STD_OUT
     mov al, SYS_write 
     int 0x80 ; print the letter
@@ -67,6 +65,6 @@ alphaloop:
     jmp alphaloop
 
 exit:
-	mov     bl, 1 ; Exit code
-	mov     al, SYS_exit ; SYS_EXIT
-	int     0x80
+	mov bl, 1 ; Exit code
+	mov al, SYS_exit ; SYS_EXIT
+	int 0x80

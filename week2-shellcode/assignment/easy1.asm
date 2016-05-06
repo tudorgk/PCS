@@ -25,8 +25,8 @@ proc:
 	push `hell`
 	mov ecx, esp
 
-	; Push array cell #1
-	push eax ; use eax as  null terminator
+	; Push string
+	push eax ; use eax as null terminator
 	push byte `l`
 	push `/wal`
 	push `/bin`
@@ -42,7 +42,7 @@ proc:
 	push ebx
 	mov ecx, esp
 
-	; eax = 0; Perform execve with /usr/bin/id -u
+	; Perform execve with /usr/bin/id -u
 	mov al, SYS_execve
 	int 0x80
 
@@ -54,6 +54,6 @@ proc:
     int 0x80
 
 message:
-	call proc
+	call proc ; push next address to the stack and jump back
     msg db "Hello world!", 10 
  
