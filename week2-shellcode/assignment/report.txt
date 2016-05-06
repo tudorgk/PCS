@@ -1,0 +1,25 @@
+  .-------------------------------.
+  |  PROACTIVE COMPUTER SECURITY  |
+  |    Week 2: Shellcode          |
+  |                               |
+  |  Tudor Dragan | xlq880@ku.dk  |
+  '-------------------------------'
+
+Report
+======
+
+For this week's assignment I decided to do the first 3 exercises from the easy category and 1 from the medium category.
+
+
+easy1.asm
+---------
+  In order to display the message Hello World I first have to find where the message is stored in memory. In order to do that I jump to the message section where I have written my "Hello World\n" mesage and the use the `call` instruction to push the address of the messages location onto the stack and continue the program. Now that I have the message address on the stack, I can pop it into `ecx` so that I can then call the syscall SYS_write to STDOUT. 
+
+  After that I must execute /usr/bin/wall with the single command line argument "hello". I push `hello` onto the stack, then I push `/usr/bin/wall` and then push the null pointers for the rest of the syscall (envp, argv).
+
+  After that, we exit with exitcode 1.
+
+easy2.asm + easy3.asm + medium5.asm
+-----------------------------------
+
+  I decided to comment most of the code because it gives a clearer view on what is going on when reading the assembly code. That is why will not go into detail here.

@@ -55,9 +55,8 @@ child:
 alphaloop:
 	cmp byte[ecx], 'z'
 	je exit ; if we reached the letter 'z' we exit
-	; increment the letter
-	add byte [esp], 1
-    mov dl, 4 ; when using push byte we push actually 4 byte onto the stack
+	add byte [esp], 1 ; increment the letter
+    mov dl, 4 ; when using pushed byte we push byte `a`, we pushed actually 4 byte onto the stack
     mov bl, STD_OUT
     mov al, SYS_write 
     int 0x80 ; print the letter

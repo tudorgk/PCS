@@ -22,7 +22,7 @@ open:
 ; ssize_t read(int fd, void *buf, size_t count);
 read:
   xchg eax, ebx ; put the address saved in ebx to '/etc/passwd' in eax
-  xchg eax, ecx ; put the address in ecx, ecx is 0 now
+  xchg eax, ecx ; put the address in ecx, eax is 0 now
   mov al, SYS_read  ; syscall for read
   mov dx, 0x0FFF ; avoid having null bytes when setting the flag
   inc edx
