@@ -293,18 +293,37 @@ Disassembly of section .text:
  8048718:	c3                   	ret    
 
 08048719 <phase_1>:
+ ; save base pointer upon enty and clear up the stack (function prologue)
  8048719:	55                   	push   ebp
  804871a:	89 e5                	mov    ebp,esp
  804871c:	83 ec 18             	sub    esp,0x18
+
+ ; set up pointer in a local variable in  esp-0xc to the address 0x80493e7 which is "This is the first flag"
  804871f:	c7 45 f4 e7 93 04 08 	mov    DWORD PTR [ebp-0xc],0x80493e7
+
+ ;get the argument (something at 0x804bb80) into eax
  8048726:	8b 45 08             	mov    eax,DWORD PTR [ebp+0x8]
+
+ ;put into edx the address at eax+0x1 = ebp+0x9
  8048729:	8d 50 01             	lea    edx,[eax+0x1]
+
+ ;some_var = argument + 1 (probably a counter)
  804872c:	89 55 08             	mov    DWORD PTR [ebp+0x8],edx
+
+ ;move in ecx the argument value value 
  804872f:	0f b6 08             	movzx  ecx,BYTE PTR [eax]
+
+ ;move in eax the local variable at ebp-0xc
  8048732:	8b 45 f4             	mov    eax,DWORD PTR [ebp-0xc]
+
+ ;move the address from eax+0x1 in adx
  8048735:	8d 50 01             	lea    edx,[eax+0x1]
+
+ ;move edx intod the localvariable at ebp-0xc
  8048738:	89 55 f4             	mov    DWORD PTR [ebp-0xc],edx
  804873b:	0f b6 00             	movzx  eax,BYTE PTR [eax]
+
+ ;comapring if the stdin value == "This is the first flag"
  804873e:	38 c1                	cmp    cl,al
  8048740:	74 05                	je     8048747 <phase_1+0x2e>
  8048742:	e8 10 ff ff ff       	call   8048657 <explode>
