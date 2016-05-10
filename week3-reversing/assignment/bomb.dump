@@ -1121,33 +1121,66 @@ Disassembly of section .text:
  80490b1:	83 ec 0c             	sub    esp,0xc
 
  ; First argument found in the .rodata section for the command 'say'. 
- ; The text is: Welcome to my little bomb. There will be 10 phases with which to blow yourself up
+ ; The text is: 'Welcome to my little bomb. There will be 10 phases with which to blow yourself up.'
  80490b4:	68 f4 95 04 08       	push   0x80495f4
  ; Call function say(char* str)
  80490b9:	e8 4d f5 ff ff       	call   804860b <say>
+ ; remove argument from the stack offset by 0x4
  80490be:	83 c4 10             	add    esp,0x10
  80490c1:	83 ec 0c             	sub    esp,0xc
+
+ ; Push argument to say(char* str)
+ ; Text is: 'You have 30 secounts to defuse the bomb...\n'
  80490c4:	68 48 96 04 08       	push   0x8049648
+ ; Call function 'say'
  80490c9:	e8 3d f5 ff ff       	call   804860b <say>
+
+; remove argument from the stack offset by 0x4
  80490ce:	83 c4 10             	add    esp,0x10
  80490d1:	83 ec 0c             	sub    esp,0xc
+
+ ; Push argument pointer address for 'say(char* str)'
+ ; The text at address 0x8049675 is: 'Have a nice day!\n'
  80490d4:	68 75 96 04 08       	push   0x8049675
  80490d9:	e8 2d f5 ff ff       	call   804860b <say>
+
+ ; remove argument from the stack offset by 0x4
  80490de:	83 c4 10             	add    esp,0x10
  80490e1:	83 ec 0c             	sub    esp,0xc
+
+ ; push argument value of 30 in decimal (I assume is the value for 30 seconds) for the function alarm
  80490e4:	6a 1e                	push   0x1e
+ ; call the external alarm function: alarm(30)
  80490e6:	e8 85 f3 ff ff       	call   8048470 <alarm@plt>
+
+ ; remove argument from the stack offset by 0x4
  80490eb:	83 c4 10             	add    esp,0x10
  80490ee:	83 ec 0c             	sub    esp,0xc
+
+ ; push say argument to the stack founda at that specific address
+ ; the text is "Phase 1:\n>"
  80490f1:	68 88 96 04 08       	push   0x8049688
+ ; call function say
  80490f6:	e8 10 f5 ff ff       	call   804860b <say>
+
+ ; clear stack by 0x8 bytes
  80490fb:	83 c4 10             	add    esp,0x10
  80490fe:	83 ec 08             	sub    esp,0x8
+
+ ; push the second argument to the stack: 1024
  8049101:	68 00 04 00 00       	push   0x400
+ ; push the first argument to the stack found in the .bss section which is a data segment 
+ ; containing statically-allocated variables represented solely by zero-valued bits initially 
+ ; probably an address to a global variable that is 0 or null global pointer
  8049106:	68 80 bb 04 08       	push   0x804bb80
+ ; call explode at 80486be ??
  804910b:	e8 ae f5 ff ff       	call   80486be <explode+0x67>
+
+ ; clear stack by 0x4 bytes
  8049110:	83 c4 10             	add    esp,0x10
  8049113:	83 ec 0c             	sub    esp,0xc
+
+
  8049116:	68 80 bb 04 08       	push   0x804bb80
  804911b:	e8 f9 f5 ff ff       	call   8048719 <phase_1>
  8049120:	83 c4 10             	add    esp,0x10
