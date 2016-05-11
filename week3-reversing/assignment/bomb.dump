@@ -299,6 +299,7 @@ Disassembly of section .text:
  804871c:	83 ec 18             	sub    esp,0x18
 
  ; set up pointer in a local variable in  esp-0xc to the address 0x80493e7 which is "This is the first flag"
+ ; might be a struct
  804871f:	c7 45 f4 e7 93 04 08 	mov    DWORD PTR [ebp-0xc],0x80493e7
 
  ;get the argument (something at 0x804bb80) into eax
@@ -325,29 +326,49 @@ Disassembly of section .text:
 
  ;comapring if the stdin value == "This is the first flag"
  804873e:	38 c1                	cmp    cl,al
+ ; if it is equal go to 0x8048747 (phase_1+0x2e) otherwise explode
  8048740:	74 05                	je     8048747 <phase_1+0x2e>
  8048742:	e8 10 ff ff ff       	call   8048657 <explode>
+
+
  8048747:	8b 45 f4             	mov    eax,DWORD PTR [ebp-0xc]
  804874a:	0f b6 00             	movzx  eax,BYTE PTR [eax]
+ ; comapre if var != other_var ??
  804874d:	84 c0                	test   al,al
+ ; if it's not equal jump to 0x8048726 (this is a do while loop)
  804874f:	75 d5                	jne    8048726 <phase_1+0xd>
- 8048751:	83 ec 0c             	sub    esp,0xc
+ ; if we have defused the bomb, we call the function say(char* str)
+ ; with the string "Phase 1 has been defused\n"
+ 8048751:	83 ec 0c             	sub    esp,0xc ; make room on stack
  8048754:	68 fe 93 04 08       	push   0x80493fe
  8048759:	e8 ad fe ff ff       	call   804860b <say>
+
+ ; reclaim stack
  804875e:	83 c4 10             	add    esp,0x10
+ ; return to caller
  8048761:	c9                   	leave  
  8048762:	c3                   	ret    
 
 08048763 <phase_2>:
+ ; save base pointer upon enty and clear up the stack (function prologue)
  8048763:	55                   	push   ebp
  8048764:	89 e5                	mov    ebp,esp
  8048766:	83 ec 28             	sub    esp,0x28
- 8048769:	8d 45 dc             	lea    eax,[ebp-0x24]
- 804876c:	83 c0 14             	add    eax,0x14
+
+
+ ; looks like an array
+ ; = mov eax, ebp-0x24 (a local variable, move the pointer in eax
+ 8048769:	8d 45 dc             	lea    eax,[ebp-0x24] 
+ ; offset the pointer address by 20 bytes
+ 804876c:	83 c0 14             	add    eax,0x14 
+ ;push the address in eax to stack
  804876f:	50                   	push   eax
+
+ ; similar with the above
  8048770:	8d 45 dc             	lea    eax,[ebp-0x24]
  8048773:	83 c0 10             	add    eax,0x10
  8048776:	50                   	push   eax
+ 
  8048777:	8d 45 dc             	lea    eax,[ebp-0x24]
  804877a:	83 c0 0c             	add    eax,0xc
  804877d:	50                   	push   eax
@@ -359,34 +380,73 @@ Disassembly of section .text:
  804878b:	50                   	push   eax
  804878c:	8d 45 dc             	lea    eax,[ebp-0x24]
  804878f:	50                   	push   eax
+
+ 
+; it is in fact  "%d %d %d %d %d %d", so the above are 6 local integers (from an array)
  8048790:	68 18 94 04 08       	push   0x8049418
+ ; pushing 1st argume to the stack for `int sscanf(const char *str, const char *format, ...)`
+ ; so we read form stdin the 6 integers with the format "%d %d %d %d %d %d" and put them in the 6 variables
  8048795:	ff 75 08             	push   DWORD PTR [ebp+0x8]
  8048798:	e8 53 fd ff ff       	call   80484f0 <sscanf@plt>
+
+ ; clear stack
  804879d:	83 c4 20             	add    esp,0x20
+ ;On success, the function returns the number of variables filled. In the case of an input failure before any data could be successfully read, EOF is returned.
+ ; in our case we compare if the number of variables filled is greater than 5
  80487a0:	83 f8 05             	cmp    eax,0x5
+ ; if true, we jump to 0x80487aa
  80487a3:	7f 05                	jg     80487aa <phase_2+0x47>
+ ; if not explode
  80487a5:	e8 ad fe ff ff       	call   8048657 <explode>
+
+ ;if the first number is NOT 9, explode! Otherwise continue to 0x80487b7
  80487aa:	8b 45 dc             	mov    eax,DWORD PTR [ebp-0x24]
  80487ad:	83 f8 09             	cmp    eax,0x9
  80487b0:	74 05                	je     80487b7 <phase_2+0x54>
  80487b2:	e8 a0 fe ff ff       	call   8048657 <explode>
+
+ ;put 1 in a local variable (a counter, no doubt)
  80487b7:	c7 45 f4 01 00 00 00 	mov    DWORD PTR [ebp-0xc],0x1
+ ;jump to 80487e2 => probably a while loop
  80487be:	eb 22                	jmp    80487e2 <phase_2+0x7f>
+
+
+ ; move the counter in eax
  80487c0:	8b 45 f4             	mov    eax,DWORD PTR [ebp-0xc]
+ ; some strcut accessor ( accessing the array by calcualting the index)
+ ; puts the value at counter i in edx
  80487c3:	8b 54 85 dc          	mov    edx,DWORD PTR [ebp+eax*4-0x24]
+ ; put the counter's value back in eax
  80487c7:	8b 45 f4             	mov    eax,DWORD PTR [ebp-0xc]
+ ; i-1 in eax
  80487ca:	83 e8 01             	sub    eax,0x1
+
+ ; access the array again, puts the value at counter-1 in eax
  80487cd:	8b 44 85 dc          	mov    eax,DWORD PTR [ebp+eax*4-0x24]
+ ; multply the value from eax with the counter
  80487d1:	0f af 45 f4          	imul   eax,DWORD PTR [ebp-0xc]
+ ; compare if the values are equal (a[i] = a[i-1] * i)
  80487d5:	39 c2                	cmp    edx,eax
  80487d7:	74 05                	je     80487de <phase_2+0x7b>
+ ; if they are equal continue, else explode
  80487d9:	e8 79 fe ff ff       	call   8048657 <explode>
+ ; increase i now (i++) 
  80487de:	83 45 f4 01          	add    DWORD PTR [ebp-0xc],0x1
+
+ ;comparing the local variable (probably a counter) to 5
  80487e2:	83 7d f4 05          	cmp    DWORD PTR [ebp-0xc],0x5
+ ;if counter<=5, jump to 80487c0
  80487e6:	7e d8                	jle    80487c0 <phase_2+0x5d>
+ 
+
+ ; clear up memeory on stack
  80487e8:	83 ec 0c             	sub    esp,0xc
+ ; push first argument on stack "Phase 2 has been defused\n"
  80487eb:	68 2a 94 04 08       	push   0x804942a
+ ; call say
  80487f0:	e8 16 fe ff ff       	call   804860b <say>
+
+ ; function epilogue
  80487f5:	83 c4 10             	add    esp,0x10
  80487f8:	c9                   	leave  
  80487f9:	c3                   	ret    
