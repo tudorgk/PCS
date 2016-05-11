@@ -338,7 +338,7 @@ Disassembly of section .text:
  ; if it's not equal jump to 0x8048726 (this is a do while loop)
  804874f:	75 d5                	jne    8048726 <phase_1+0xd>
  ; if we have defused the bomb, we call the function say(char* str)
- ; with the string "Phase 1 has been defused\n"
+ ; with the string "Phase 1 has been defused"
  8048751:	83 ec 0c             	sub    esp,0xc ; make room on stack
  8048754:	68 fe 93 04 08       	push   0x80493fe
  8048759:	e8 ad fe ff ff       	call   804860b <say>
@@ -441,7 +441,7 @@ Disassembly of section .text:
 
  ; clear up memeory on stack
  80487e8:	83 ec 0c             	sub    esp,0xc
- ; push first argument on stack "Phase 2 has been defused\n"
+ ; push first argument on stack "Phase 2 has been defused"
  80487eb:	68 2a 94 04 08       	push   0x804942a
  ; call say
  80487f0:	e8 16 fe ff ff       	call   804860b <say>
@@ -452,51 +452,102 @@ Disassembly of section .text:
  80487f9:	c3                   	ret    
 
 080487fa <phase_3>:
+; save base pointer upon enty and clear up the stack (function prologue)
  80487fa:	55                   	push   ebp
  80487fb:	89 e5                	mov    ebp,esp
  80487fd:	83 ec 18             	sub    esp,0x18
+
+ ;push local variable address (&b) to stack as argument for sscanf
  8048800:	8d 45 ec             	lea    eax,[ebp-0x14]
  8048803:	50                   	push   eax
+ ;push local variable address (&a) to stack as argument for sscanf
  8048804:	8d 45 f0             	lea    eax,[ebp-0x10]
  8048807:	50                   	push   eax
+ ;push '%d %d' as the format argument 
  8048808:	68 44 94 04 08       	push   0x8049444
+ ; push the first argument's pointer of the function 'phase_3'
  804880d:	ff 75 08             	push   DWORD PTR [ebp+0x8]
+ ; call sscanf
  8048810:	e8 db fc ff ff       	call   80484f0 <sscanf@plt>
+ ;clear up stack
  8048815:	83 c4 10             	add    esp,0x10
+ ; compare if the return value from sscanf > 1
  8048818:	83 f8 01             	cmp    eax,0x1
+ ; if it's > 1, go to 8048822, else call explode
+ ; will go to 8048822 if eax >s 1
+ ; where >s is "signed greater than"
  804881b:	7f 05                	jg     8048822 <phase_3+0x28>
  804881d:	e8 35 fe ff ff       	call   8048657 <explode>
+
+ ; move b into eax
  8048822:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
+ ; compare if a > 999
  8048825:	3d e7 03 00 00       	cmp    eax,0x3e7
+ ; will go to 8048831 if a >s 999
+ ; where >s is "signed greater than"
  804882a:	77 05                	ja     8048831 <phase_3+0x37>
+ ; else explode
  804882c:	e8 26 fe ff ff       	call   8048657 <explode>
+
+ ; set local variable to 0 (probably a counter i = 0) for a while loop
  8048831:	c7 45 f4 00 00 00 00 	mov    DWORD PTR [ebp-0xc],0x0
+ ; jump to 8048861 -> while (i != 1)
  8048838:	eb 27                	jmp    8048861 <phase_3+0x67>
+
+ ; start of while block
  804883a:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
+ ; a & 1
  804883d:	83 e0 01             	and    eax,0x1
  8048840:	85 c0                	test   eax,eax
+ ; Jump short eax is zero (ZF=1). == Jump if 'a' is even, AKA 'a%2 == 0'
  8048842:	74 11                	je     8048855 <phase_3+0x5b>
+ ; else if 'a%2 == 1', move 'a' in edx
  8048844:	8b 55 f0             	mov    edx,DWORD PTR [ebp-0x10]
+ ; eax == 1 at this point, edx = a => eax = a
  8048847:	89 d0                	mov    eax,edx
+ ; eax = eax + a => eax = 2a
  8048849:	01 c0                	add    eax,eax
+ ; eax = eax + a => eax = 3a
  804884b:	01 d0                	add    eax,edx
+ ; eax = eax + 1 => eax = 3a + 1
  804884d:	83 c0 01             	add    eax,0x1
+ ; a = 3a + 1
  8048850:	89 45 f0             	mov    DWORD PTR [ebp-0x10],eax
+ ; jmp to 804885d
  8048853:	eb 08                	jmp    804885d <phase_3+0x63>
+
+ ; move 'a' in eax
  8048855:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
+ ; shift a >> 1
  8048858:	d1 e8                	shr    eax,1
+ ; save the new value to 'a'
  804885a:	89 45 f0             	mov    DWORD PTR [ebp-0x10],eax
+ ; increment counter
  804885d:	83 45 f4 01          	add    DWORD PTR [ebp-0xc],0x1
+
+
+ ; while (a != 1), jump to 804883a
  8048861:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
  8048864:	83 f8 01             	cmp    eax,0x1
  8048867:	75 d1                	jne    804883a <phase_3+0x40>
+
+ ; at this point 'a == 1'
+ ; move 'b' into eax => eax = b
  8048869:	8b 45 ec             	mov    eax,DWORD PTR [ebp-0x14]
+ ; compare if 'b == i'
  804886c:	3b 45 f4             	cmp    eax,DWORD PTR [ebp-0xc]
+ ; if equals jump to 8048876, else explode!
  804886f:	74 05                	je     8048876 <phase_3+0x7c>
  8048871:	e8 e1 fd ff ff       	call   8048657 <explode>
+
+ ;clear up stack
  8048876:	83 ec 0c             	sub    esp,0xc
+ ;push argument for function say ("Phase 3 has been defused")
  8048879:	68 4a 94 04 08       	push   0x804944a
+ ;call function say
  804887e:	e8 88 fd ff ff       	call   804860b <say>
+
+ ;function epilogue
  8048883:	83 c4 10             	add    esp,0x10
  8048886:	c9                   	leave  
  8048887:	c3                   	ret    
