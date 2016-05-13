@@ -553,18 +553,33 @@ Disassembly of section .text:
  8048887:	c3                   	ret    
 
 08048888 <func4>:
+ ; function prologue
  8048888:	55                   	push   ebp
  8048889:	89 e5                	mov    ebp,esp
+
+; don't know what this does? why are we pushing ebx?
  804888b:	53                   	push   ebx
  804888c:	83 ec 04             	sub    esp,0x4
+ 
+ ; comparing our argument to 2
  804888f:	83 7d 08 02          	cmp    DWORD PTR [ebp+0x8],0x2
+ ;if the number is greater than 2?
  8048893:	7f 07                	jg     804889c <func4+0x14>
+ ; if not, put 1 into eax and jump to 80488d8
  8048895:	b8 01 00 00 00       	mov    eax,0x1
  804889a:	eb 3c                	jmp    80488d8 <func4+0x50>
+
+; here our argument is >2 and we put the argument in eax (eax = a)
  804889c:	8b 45 08             	mov    eax,DWORD PTR [ebp+0x8]
+ ; eax = eax - 1
  804889f:	83 e8 01             	sub    eax,0x1
+
+ ;clear up stack
  80488a2:	83 ec 0c             	sub    esp,0xc
+
+ ; push eax (a-1) to stack
  80488a5:	50                   	push   eax
+ ; recursive func4 call
  80488a6:	e8 dd ff ff ff       	call   8048888 <func4>
  80488ab:	83 c4 10             	add    esp,0x10
  80488ae:	89 c3                	mov    ebx,eax
@@ -582,32 +597,50 @@ Disassembly of section .text:
  80488ce:	e8 b5 ff ff ff       	call   8048888 <func4>
  80488d3:	83 c4 10             	add    esp,0x10
  80488d6:	01 d8                	add    eax,ebx
+
+ ; put into ebx a local variable
  80488d8:	8b 5d fc             	mov    ebx,DWORD PTR [ebp-0x4]
+ ;function prologue
  80488db:	c9                   	leave  
  80488dc:	c3                   	ret    
 
 080488dd <phase_4>:
+; save base pointer upon enty and make room on the stack (function prologue)
  80488dd:	55                   	push   ebp
  80488de:	89 e5                	mov    ebp,esp
  80488e0:	83 ec 18             	sub    esp,0x18
  80488e3:	83 ec 04             	sub    esp,0x4
+
+;push local variable address (&a) to stack as argument for sscanf
  80488e6:	8d 45 f4             	lea    eax,[ebp-0xc]
  80488e9:	50                   	push   eax
+
+; pushing "%d" to the stack for the second param
  80488ea:	68 64 94 04 08       	push   0x8049464
+ ; push the first argument's pointer of the function 'phase_4'
  80488ef:	ff 75 08             	push   DWORD PTR [ebp+0x8]
+ ; call sscanf
  80488f2:	e8 f9 fb ff ff       	call   80484f0 <sscanf@plt>
+ ; clear up stack
  80488f7:	83 c4 10             	add    esp,0x10
+ ; if != 0, we jump to 0x8048903 (jg jumps if ZF = 0 and SF = OF)
  80488fa:	85 c0                	test   eax,eax
  80488fc:	7f 05                	jg     8048903 <phase_4+0x26>
+ ; else explode
  80488fe:	e8 54 fd ff ff       	call   8048657 <explode>
+
+ ; move into eax our a var
  8048903:	8b 45 f4             	mov    eax,DWORD PTR [ebp-0xc]
  8048906:	83 ec 0c             	sub    esp,0xc
+ ; push the argument for func4
  8048909:	50                   	push   eax
+ ; call func 4 with the number we inputted as parameter
  804890a:	e8 79 ff ff ff       	call   8048888 <func4>
  804890f:	83 c4 10             	add    esp,0x10
  8048912:	3d 31 6a 04 00       	cmp    eax,0x46a31
  8048917:	74 05                	je     804891e <phase_4+0x41>
  8048919:	e8 39 fd ff ff       	call   8048657 <explode>
+ 
  804891e:	83 ec 0c             	sub    esp,0xc
  8048921:	68 67 94 04 08       	push   0x8049467
  8048926:	e8 e0 fc ff ff       	call   804860b <say>

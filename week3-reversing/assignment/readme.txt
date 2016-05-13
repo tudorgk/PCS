@@ -2,31 +2,11 @@
   |  PROACTIVE COMPUTER SECURITY  |
   |    Week 3: Reversing          |
   |      Weekly assignment        |
+  |     Tudor Dragan xlq880       |
   '-------------------------------'
 
-1.  Defuse as many phases as you can, you should be able to solve at least the first 3 phases,
-    and the last 3 phases is only for bonus points.
+For this assignment I did the first 3 phases and commented out the 4th.
+I couldn't find the right number for phase 4, though.
+I think I wrote decent enough comments in the asssembly dump `bomb.dump` so that the attacker could undestand what the phases do.
+Solutions are in the `solutions.txt` file.
 
-2.  Handin a solution.txt which defuses the phases when used as
-    ./bomb < solution.txt
-
-2.  Handin a commmented assembly listing of the phases you have defuesed,
-    and possibly some puesdo code too. See commented-assembly.txt for an example.
-
-Hints:
-======
-
-1. $ objdump -M intel -d bomb
-2. $ objdump -x bomb
-3. $ readelf -x .data bomb
-4. $ readelf -x .rodata bomb
-5. $ gdb ./bomb
-5a. (gdb) handle SIGALRM ignore
-7. $ strace ./bomb
-
-
-5. To keep your TA happy:
-      - Keep you reporting to one or two pages,
-      - Don't hand in a Word document, if you need fancy formatting
-        and pictures then use PDF; otherwise hand in a text file
-        perhaps with some separate graphics files.
