@@ -215,19 +215,36 @@ Disassembly of section .text:
  8048518:	84 c0                	test   al,al
  ;if not \0 jumpt to 80484f2
  804851a:	75 d6                	jne    80484f2 <parse+0x26>
- ;if it is the null termiantor continue
- ;prepare printf arguments
+ ; if it is the null terminator continue
+ ; prepare printf arguments 
+ ; int printf(const char *format, ...);
+ ; this is the iterator (i) => eax = i
  804851c:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
+ ; pointer to the array of char (*str)
  804851f:	8d 55 c4             	lea    edx,[ebp-0x3c]
  8048522:	83 c2 04             	add    edx,0x4
+
+ ; put the variables on the stack
+ ; You can use an asterisk (*) to pass the width specifier/precision to printf(),
+ ; rather than hard coding it into the format string, i.e.
+ ; printf("%.*s\n", str_len, str);
+
+ ; put the *str address
  8048525:	89 54 24 08          	mov    DWORD PTR [esp+0x8],edx
+ ; put i (number och chars read)
  8048529:	89 44 24 04          	mov    DWORD PTR [esp+0x4],eax
+ ; You gave me "%.*s". Not bad 
  804852d:	c7 04 24 40 86 04 08 	mov    DWORD PTR [esp],0x8048640
+ ; call printf("%.*s\n", i, &str);
  8048534:	e8 57 fe ff ff       	call   8048390 <printf@plt>
+
+ ; check stack cookie
  8048539:	b8 00 00 00 00       	mov    eax,0x0
  804853e:	8b 55 f4             	mov    edx,DWORD PTR [ebp-0xc]
  8048541:	65 33 15 14 00 00 00 	xor    edx,DWORD PTR gs:0x14
+ ; if everything is ok, leave 
  8048548:	74 05                	je     804854f <parse+0x83>
+ ; else call __stack_chk_fail
  804854a:	e8 51 fe ff ff       	call   80483a0 <__stack_chk_fail@plt>
  804854f:	c9                   	leave  
  8048550:	c3                   	ret    
