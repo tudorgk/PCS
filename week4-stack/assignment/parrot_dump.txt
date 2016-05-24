@@ -182,28 +182,41 @@ Disassembly of section .text:
  80484e9:	c7 45 f0 00 00 00 00 	mov    DWORD PTR [ebp-0x10],0x0
  ; jmp to 804850d
  80484f0:	eb 1b                	jmp    804850d <parse+0x41>
+
+ ; --------------------------
+ ; here we are in a loop
+ ; put the variable (i) value at [ebp-0x10] in eax
+ ; it's 0 now => eax = 0
  80484f2:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
+ ; put the variable value at [ebp-0x3c] in eax
+ ; it's the pointer address (ptr) to our string that was passed in as argument
+ ; ecx = &some_address
  80484f5:	8b 4d c4             	mov    ecx,DWORD PTR [ebp-0x3c]
+ ; put in edx 0 => edx = 0
  80484f8:	8b 55 f0             	mov    edx,DWORD PTR [ebp-0x10]
+ ; == *(i+ptr)
  80484fb:	01 ca                	add    edx,ecx
  80484fd:	0f b6 12             	movzx  edx,BYTE PTR [edx]
+ ; puts the letter in a char array (str[])
  8048500:	88 54 05 c8          	mov    BYTE PTR [ebp+eax*1-0x38],dl
+ ; increment the counter (i++)
  8048504:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
  8048507:	83 c0 01             	add    eax,0x1
  804850a:	89 45 f0             	mov    DWORD PTR [ebp-0x10],eax
 
- ; put in edx the value at ebp-0x3c (the pointer to our string from the argv[0])
+ ; put in edx the value at ebp-0x3c (the pointer to our string from the argv[0]) (*str)
  804850d:	8b 55 c4             	mov    edx,DWORD PTR [ebp-0x3c]
- ; put in eax the value at ebp-0x10 (wich is 0)
+ ; put in eax the value at ebp-0x10 (i)
  8048510:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
- ; it seems we have our address again in eax (0 + addr = addr)
+ ; it seems we have our address again in eax (i + ptr)
  8048513:	01 d0                	add    eax,edx
- ; check if the character at [eax] is \0
+ ; check if the character at [eax] is \0 (== {*str == '\0'})
  8048515:	0f b6 00             	movzx  eax,BYTE PTR [eax]
  8048518:	84 c0                	test   al,al
  ;if not \0 jumpt to 80484f2
  804851a:	75 d6                	jne    80484f2 <parse+0x26>
  ;if it is the null termiantor continue
+ ;prepare printf arguments
  804851c:	8b 45 f0             	mov    eax,DWORD PTR [ebp-0x10]
  804851f:	8d 55 c4             	lea    edx,[ebp-0x3c]
  8048522:	83 c2 04             	add    edx,0x4
