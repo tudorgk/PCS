@@ -162,7 +162,7 @@ Disassembly of section .text:
 ; function prologue (saving base pointer)
  80484cc:	55                   	push   ebp
  80484cd:	89 e5                	mov    ebp,esp
- ; claim stack
+ ; claim stack (104 bytes)
  80484cf:	83 ec 68             	sub    esp,0x68
  ; eax contains the address found in ebp+0x8 (first and only argument)
  80484d2:	8b 45 08             	mov    eax,DWORD PTR [ebp+0x8]
