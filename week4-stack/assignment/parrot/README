@@ -1,0 +1,17 @@
+  .-------------------------------.
+  |  PROACTIVE COMPUTER SECURITY  |
+  |    Week 4: Stack overflows    |
+  |     Tudor Dragan | xlq880     |
+  '-------------------------------'
+
+First of all I want to apologize for last week's submission. I was pressed by time and just uploaded everything I have done at that point (without removing the unnecessary files).
+
+For this weeks assignment I have done only the `parrot` executable :(.
+I have commented in detail the `parse` function in parrot in `parrot_dump.txt`.
+In `exploit.c` I have written a program in C to find out where my return address is. 
+The struct represents the memory layout representation that I consider it to valid.
+
+I have written the shellcode in `shellcode.asm`. Please use the Makefile to build the shelcode and the exploit executable.
+I have tryed to find the address with gdb but to no avail, so what I eventually did is to manually add the address in the exploit string in `doit_parrot.py`. When running with gdb the exploit executable, we can clearly see that I'm overwriting the return address with 0x41414141. I have tried to set `set exec-wrapper ./exploit` to debug my program, but I couldn't set the breakpoint where I wanted it to be. Alas I replaced the last 4 bytes with the adress where the buffer, is so it will return there.
+
+To run the exploit just use `python doit_parrot.py`
