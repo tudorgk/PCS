@@ -1,16 +1,3 @@
-  .-------------------------------.
-  |  PROACTIVE COMPUTER SECURITY  |
-  |    Week 3: Reversing          |
-  |      Exercises                |
-  '-------------------------------'
-
-This week there is only one exercise. You must reverse engineer the program
-'mud' and figure out what and how it does it.
-
-Try to answer the following questions:
-    - Which file format is it?
-    - What does the program do (draw a picture -- literally)?
-    - What are the different ways the program can end?
-    - How do you get it to end in each way?
-
-Have fun!
+version https://git-lfs.github.com/spec/v1
+oid sha256:11ec9635d60365a2bb22a563821240061c150bc4ac95c31b2a8e4629b4af4e64
+size 546
